@@ -14,7 +14,7 @@ type Handshake struct {
 	PeerId     [20]byte
 }
 
-func NewHandshake(b []byte) (*Handshake, error) {
+func HandshakeFrom(b []byte) (*Handshake, error) {
 	if len(b) != 68 {
 		return nil, fmt.Errorf("handshake must have 68 bytes, but got %d", len(b))
 	}
