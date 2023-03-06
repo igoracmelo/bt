@@ -8,7 +8,7 @@ import (
 )
 
 func Test_From(t *testing.T) {
-	f, err := os.Open("./samples/debian.torrent")
+	f, err := os.Open("../samples/debian.torrent")
 	if err != nil {
 		t.Fatal(err)
 	}
