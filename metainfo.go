@@ -1,4 +1,4 @@
-package meta
+package main
 
 import (
 	"bytes"
@@ -26,7 +26,7 @@ type Info struct {
 	Pieces      [][20]byte
 }
 
-func From(r io.Reader) (*MetaInfo, error) {
+func NewMetaInfo(r io.Reader) (*MetaInfo, error) {
 	dto := struct {
 		Announce     string `bencode:"announce"`
 		Comment      string `bencode:"comment"`

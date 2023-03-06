@@ -1,4 +1,4 @@
-package peer
+package main
 
 import (
 	"encoding/hex"
@@ -11,7 +11,7 @@ func Test_FindPeersHTTP(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	_, err = FindPeersHTTP("http://bttracker.debian.org:6969/announce", FindPeersParams{
+	peers, err := FindPeersHTTP("http://bttracker.debian.org:6969/announce", FindPeersParams{
 		InfoHash:   string(infoHash),
 		PeerId:     "It's a me, Igor! Ok?",
 		Port:       54321,
@@ -22,5 +22,9 @@ func Test_FindPeersHTTP(t *testing.T) {
 
 	if err != nil {
 		t.Fatal(err)
+	}
+
+	if len(peers) > 0 {
+		t.Logf("peer Ip: %s, Port: %d", string(peers[0].Ip), peers[0].Port)
 	}
 }

@@ -1,4 +1,4 @@
-package meta
+package main
 
 import (
 	"encoding/hex"
@@ -8,12 +8,12 @@ import (
 )
 
 func Test_From(t *testing.T) {
-	f, err := os.Open("../samples/debian.torrent")
+	f, err := os.Open("./samples/debian.torrent")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	got, err := From(f)
+	got, err := NewMetaInfo(f)
 	if err != nil {
 		t.Fatal(err)
 	}
