@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"encoding/binary"
+	"io"
+)
 
 type MsgId uint8
 
@@ -21,28 +24,34 @@ type Message struct {
 	Payload []byte
 }
 
-func MessageFrom(b []byte) (*Message, error) {
-	if len(b) == 0 {
-		return nil, fmt.Errorf("invalid message with length 0")
+func MessageFrom(r io.Reader) (*Message, error) {
+	l := make([]byte, 4)
+	_, err := io.ReadFull(r, l)
+	if err != nil {
+		return nil, err
 	}
 
-	p := []byte{}
-	if len(b) > 1 {
-		p = b[1:]
+	msgbuf := make([]byte, binary.BigEndian.Uint32(l))
+	_, err = io.ReadFull(r, msgbuf)
+	if err != nil {
+		return nil, err
 	}
 
 	msg := &Message{
-		Id:      MsgId(b[0]),
-		Payload: p,
+		Id:      MsgId(msgbuf[0]),
+		Payload: msgbuf[1:],
 	}
 
 	return msg, nil
 }
 
 func (m *Message) Bytes() []byte {
-	b := make([]byte, len(m.Payload)+1)
-	b[0] = byte(m.Id)
-	copy(b[1:], m.Payload)
+	// 4 bytes: length, 1 byte: message type, +payload length
+	b := make([]byte, 0, 4+1+len(m.Payload))
+
+	b = binary.BigEndian.AppendUint32(b, 1+uint32(len(m.Payload)))
+	b = append(b, byte(m.Id))
+	b = append(b, m.Payload...)
 
 	return b
 }
