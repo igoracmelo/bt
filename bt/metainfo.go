@@ -1,4 +1,4 @@
-package main
+package bt
 
 import (
 	"bytes"
@@ -7,7 +7,7 @@ import (
 	"io"
 	"time"
 
-	"github.com/igoracmelo/gtt/logger"
+	"github.com/igoracmelo/bt/logger"
 	bencode "github.com/jackpal/bencode-go"
 )
 

@@ -1,4 +1,4 @@
-package main
+package bt
 
 import (
 	"encoding/hex"
@@ -25,6 +25,6 @@ func Test_FindPeersHTTP(t *testing.T) {
 	}
 
 	if len(peers) > 0 {
-		t.Logf("peer Ip: %s, Port: %d", string(peers[0].Ip), peers[0].Port)
+		// t.Logf("peer Ip: %s, Port: %d", string(peers[0].Ip), peers[0].Port)
 	}
 }

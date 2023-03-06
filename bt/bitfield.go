@@ -1,4 +1,4 @@
-package main
+package bt
 
 type Bitfield []byte
 

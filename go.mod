@@ -1,4 +1,4 @@
-module github.com/igoracmelo/gtt
+module github.com/igoracmelo/bt
 
 go 1.20
 
