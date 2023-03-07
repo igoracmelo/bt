@@ -24,18 +24,13 @@ type PeerConn struct {
 	busy atomic.Bool
 }
 
-func NewPeerConn(peer Peer, myId [20]byte, infoHash [20]byte) (*PeerConn, error) {
+func NewPeerConn(peer Peer, myHs *Handshake) (*PeerConn, error) {
 	conn, err := net.DialTimeout("tcp", peer.Address(), 3*time.Second)
 	if err != nil {
 		return nil, err
 	}
 
 	defer conn.SetDeadline(time.Time{})
-
-	myHs := &Handshake{
-		InfoHash: infoHash,
-		PeerId:   myId,
-	}
 
 	conn.SetDeadline(time.Now().Add(5 * time.Second))
 	_, err = conn.Write(myHs.Bytes())
@@ -96,5 +91,5 @@ func (pc *PeerConn) ReadMessage() (*Message, error) {
 }
 
 func (pc *PeerConn) Close() error {
-	return pc.Close()
+	return pc.conn.Close()
 }
