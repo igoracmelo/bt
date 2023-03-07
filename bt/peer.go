@@ -3,6 +3,8 @@ package bt
 import (
 	"fmt"
 	"net"
+	"sync/atomic"
+	"time"
 )
 
 type Peer struct {
@@ -63,4 +65,36 @@ func NewPeerConn(peer Peer, myId [20]byte, infoHash [20]byte) (*PeerConn, error)
 		conn: conn,
 		busy: atomic.Bool{},
 	}, nil
+}
+
+func (pc *PeerConn) WriteMessage(msg Message) error {
+	pc.busy.Store(true)
+	defer pc.busy.Store(false)
+
+	_, err := pc.conn.Write(msg.Bytes())
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (pc *PeerConn) ReadMessage() (*Message, error) {
+	pc.busy.Store(true)
+	defer pc.busy.Store(false)
+
+	msg, err := MessageFrom(pc.conn)
+	if err != nil {
+		return nil, err
+	}
+
+	if msg.Id == MsgBitfield {
+		pc.bf = Bitfield(msg.Payload)
+	}
+
+	return msg, nil
+}
+
+func (pc *PeerConn) Close() error {
+	return pc.Close()
 }

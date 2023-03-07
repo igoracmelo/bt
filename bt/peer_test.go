@@ -1,7 +1,7 @@
 package bt
 
 import (
-	"log"
+	"fmt"
 	"net"
 	"testing"
 )
@@ -19,7 +19,7 @@ func Test_Peer_Address(t *testing.T) {
 	}
 }
 
-func Test_PeerConn_New(t *testing.T) {
+func Test_PeerConn_HandshakeSendMessageAndReceiveMessage(t *testing.T) {
 	infoHash := [20]byte([]byte("It's a me, InfoHash!"))
 
 	yourHs := Handshake{
@@ -29,7 +29,7 @@ func Test_PeerConn_New(t *testing.T) {
 
 	ready := make(chan struct{})
 
-	// dummy servers that only accepts a connection and sends the expected infohash
+	// dummy server
 	go func() {
 		l, err := net.Listen("tcp", "localhost:54321")
 		if err != nil {
@@ -41,7 +41,40 @@ func Test_PeerConn_New(t *testing.T) {
 		if err != nil {
 			panic(err)
 		}
+
+		buf := make([]byte, 1024)
+
+		// read handshake
+		n, err := urPeer.Read(buf)
+		if err != nil {
+			panic(err)
+		}
+		if n != 68 {
+			panic("invalid message handshake length")
+		}
+
+		// send handshake
 		urPeer.Write(yourHs.Bytes())
+
+		// read message
+		n, err = urPeer.Read(buf)
+		if err != nil {
+			panic(err)
+		}
+
+		if n != 4+1+19 {
+			panic(fmt.Sprintf("expected message to be 4 + 1 + 19 bytes, but got %d", n))
+		}
+
+		msg := Message{
+			Id:      MsgInterested,
+			Payload: []byte("hey my man!"),
+		}
+
+		_, err = urPeer.Write(msg.Bytes())
+		if err != nil {
+			panic(err)
+		}
 	}()
 
 	<-ready
@@ -51,7 +84,27 @@ func Test_PeerConn_New(t *testing.T) {
 
 	pc, err := NewPeerConn(peer, myId, infoHash)
 	if err != nil {
-		log.Fatal(err)
+		t.Fatal(err)
 	}
-	defer pc.Close()
+
+	err = pc.WriteMessage(Message{
+		Id:      MsgChoke,
+		Payload: []byte("hey there my friend"),
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	msg, err := pc.ReadMessage()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if msg.Id != MsgInterested {
+		t.Errorf("want: MsgInterested (%d), got: %d", MsgInterested, msg.Id)
+	}
+
+	if string(msg.Payload) != "hey my man!" {
+		t.Errorf("want: hey my man!, got: %s", string(msg.Payload))
+	}
 }
