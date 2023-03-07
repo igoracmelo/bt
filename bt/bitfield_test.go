@@ -2,7 +2,7 @@ package bt
 
 import "testing"
 
-func Test_BitfieldGet(t *testing.T) {
+func Test_Bitfield_Get(t *testing.T) {
 	bf := Bitfield([]byte{0b10010001})
 
 	tests := []struct {
@@ -27,7 +27,7 @@ func Test_BitfieldGet(t *testing.T) {
 	}
 }
 
-func Test_BitfieldSet(t *testing.T) {
+func Test_Bitfield_Set(t *testing.T) {
 	bf := Bitfield([]byte{0b11110000})
 	bf.Set(0, false)
 	bf.Set(1, true)
