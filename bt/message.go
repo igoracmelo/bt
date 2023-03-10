@@ -17,6 +17,7 @@ const (
 	MsgRequest       MsgId = 6
 	MsgPiece         MsgId = 7
 	MsgCancel        MsgId = 8
+	MsgKeepAlive     MsgId = 22
 )
 
 type Message struct {
@@ -25,27 +26,37 @@ type Message struct {
 }
 
 func MessageFrom(r io.Reader) (*Message, error) {
-	l := make([]byte, 4)
-	_, err := io.ReadFull(r, l)
+	lenbuf := make([]byte, 4)
+	_, err := io.ReadFull(r, lenbuf)
 	if err != nil {
 		return nil, err
 	}
 
-	msgbuf := make([]byte, binary.BigEndian.Uint32(l))
+	length := binary.BigEndian.Uint32(lenbuf)
+	if length == 0 {
+		return &Message{
+			Id:      MsgKeepAlive,
+			Payload: []byte{},
+		}, nil
+	}
+
+	msgbuf := make([]byte, length)
 	_, err = io.ReadFull(r, msgbuf)
 	if err != nil {
 		return nil, err
 	}
 
-	msg := &Message{
+	return &Message{
 		Id:      MsgId(msgbuf[0]),
 		Payload: msgbuf[1:],
-	}
-
-	return msg, nil
+	}, nil
 }
 
 func (m *Message) Bytes() []byte {
+	if m.Id == MsgKeepAlive {
+		return []byte{0, 0, 0, 0}
+	}
+
 	// 4 bytes: length, 1 byte: message type, +payload length
 	b := make([]byte, 0, 4+1+len(m.Payload))
 
