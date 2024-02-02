@@ -56,6 +56,15 @@ func (bf Bitfield) Set(i int64, set bool) bool {
 	return true
 }
 
+func (bf Bitfield) Complete() bool {
+	for _, has := range bf.Pieces() {
+		if !has {
+			return false
+		}
+	}
+	return true
+}
+
 func (bf Bitfield) Pieces() []bool {
 	pieces := make([]bool, bf.len)
 
@@ -64,6 +73,10 @@ func (bf Bitfield) Pieces() []bool {
 	}
 
 	return pieces
+}
+
+func (bf Bitfield) Bytes() []byte {
+	return bf.data
 }
 
 func (bf Bitfield) String() string {
@@ -78,7 +91,7 @@ func (bf Bitfield) String() string {
 func (bf Bitfield) DebugString() string {
 	s := ""
 	for i, b := range bf.data {
-		s += fmt.Sprintf("%08b - byte %d - bit %d\n", b, i, i*8)
+		s += fmt.Sprintf("%08b - byte %d - bit %d\n", b, i+1, (i+1)*8)
 	}
 	return s
 }

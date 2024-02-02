@@ -10,21 +10,31 @@ type Peers struct {
 }
 
 // GetPiece provides a mock function with given fields: piece, index
-func (_m *Peers) GetPiece(piece []byte, index int64) error {
+func (_m *Peers) GetPiece(piece []byte, index int64) (int, error) {
 	ret := _m.Called(piece, index)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetPiece")
 	}
 
-	var r0 error
-	if rf, ok := ret.Get(0).(func([]byte, int64) error); ok {
+	var r0 int
+	var r1 error
+	if rf, ok := ret.Get(0).(func([]byte, int64) (int, error)); ok {
+		return rf(piece, index)
+	}
+	if rf, ok := ret.Get(0).(func([]byte, int64) int); ok {
 		r0 = rf(piece, index)
 	} else {
-		r0 = ret.Error(0)
+		r0 = ret.Get(0).(int)
 	}
 
-	return r0
+	if rf, ok := ret.Get(1).(func([]byte, int64) error); ok {
+		r1 = rf(piece, index)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }
 
 // NewPeers creates a new instance of Peers. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
